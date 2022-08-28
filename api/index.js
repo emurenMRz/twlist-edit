@@ -20,7 +20,7 @@ api.get("/login", async (reqeust, response) => {
 			state: SERVICE_NAME,
 			code_challenge_method: "s256",
 		}));
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 api.get("/callback", async (request, response) => {
@@ -42,13 +42,13 @@ api.get("/callback", async (request, response) => {
 			bearerToken = new Twitter.OAuth2Bearer(token.access_token);
 		response.setHeader('Set-Cookie', cookie);
 		response.redirect(`/?login=${me.data.username}`);
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 api.get("/revoke", async (reqeust, response) => {
 	try {
 		response.json({ revoked: await authClient.revokeAccessToken() });
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 //
@@ -72,7 +72,7 @@ api.get("/lists", async (request, response) => {
 		if ("next" in request.query)
 			params.pagination_token = request.query.next;
 		response.json(await client.lists.listUserOwnedLists(uid, params));
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 api.post("/lists/create", async (reqeust, response) => {
@@ -94,7 +94,7 @@ api.post("/lists/create", async (reqeust, response) => {
 			],
 			"user.fields": ["created_at"],
 		}));
-	} catch (e) { console.error(e) }
+	} catch (e) { response.json(e); }
 });
 
 api.put("/lists/:id", async (reqeust, response) => {
@@ -105,13 +105,13 @@ api.put("/lists/:id", async (reqeust, response) => {
 		if ("description" in q) params.description = q.description;
 		if ("private" in q) params.private = q.private;
 		response.json(await client.lists.listIdUpdate(q.id, params));
-	} catch (e) { console.error(e) }
+	} catch (e) { response.json(e); }
 });
 
 api.delete("/lists/:id", async (reqeust, response) => {
 	try {
 		response.json(await client.lists.listIdDelete(reqeust.query.id));
-	} catch (e) { console.error(e) }
+	} catch (e) { response.json(e); }
 });
 
 //
@@ -142,19 +142,19 @@ api.get("/list/:id", async (request, response) => {
 		if ("next" in request.query)
 			params.pagination_token = request.query.next;
 		response.json(await client.users.listGetMembers(request.query.id, params));
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 api.post("/list/:id", async (request, response) => {
 	try {
 		response.json(await client.lists.listAddMember(request.query.id, request.query.member_id));
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 api.delete("/list/:id", async (request, response) => {
 	try {
 		response.json(await client.lists.listRemoveMember(request.query.id, request.query.member_id));
-	} catch (e) { console.error(e); }
+	} catch (e) { response.json(e); }
 });
 
 ///////////////////////////////////////////////////////////////////////////////
