@@ -1,0 +1,13 @@
+{
+  "name": "tw-list-edit-api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r dotenv/config ."
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "twitter-api-sdk": "^1.1.0"
+  }
+}
