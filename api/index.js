@@ -79,7 +79,7 @@ api.post("/lists/create", async (reqeust, response) => {
 	try {
 		const q = reqeust.query;
 		const params = { name: q.name };
-		if ("discription" in q) params.discription = q.discription;
+		if ("description" in q) params.description = q.description;
 		if ("private" in q) params.private = q.private;
 		const r = await client.lists.listIdCreate(params);
 		console.debug(r);
@@ -102,7 +102,7 @@ api.put("/lists/:id", async (reqeust, response) => {
 		const q = reqeust.query;
 		const params = { name: q.name };
 		if ("name" in q) params.name = q.name;
-		if ("discription" in q) params.discription = q.discription;
+		if ("description" in q) params.description = q.description;
 		if ("private" in q) params.private = q.private;
 		response.json(await client.lists.listIdUpdate(q.id, params));
 	} catch (e) { console.error(e) }
