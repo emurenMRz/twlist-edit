@@ -159,7 +159,7 @@ api.get("/list/:id", async (request, response) => {
 
 api.post("/list/:id", async (request, response) => {
 	try {
-		const { id, member_id } = reqeust.query;
+		const { id, member_id } = request.query;
 		if (!member_id) throw new TypeError("'member_id' is required.");
 		response.json(await client.lists.listAddMember(id, member_id));
 	} catch (e) { responseException(response, e); }
@@ -167,7 +167,7 @@ api.post("/list/:id", async (request, response) => {
 
 api.delete("/list/:id", async (request, response) => {
 	try {
-		const { id, member_id } = reqeust.query;
+		const { id, member_id } = request.query;
 		if (!member_id) throw new TypeError("'member_id' is required.");
 		response.json(await client.lists.listRemoveMember(id, member_id));
 	} catch (e) { responseException(response, e); }
