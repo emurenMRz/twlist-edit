@@ -14,13 +14,21 @@ const port = process.env.PORT || 3000;
 const SERVICE_NAME = "tw-list-edit";
 let bearerToken = null;
 
+function responseException(response, e) {
+	console.dir(e, { depth: null });
+
+	let result = e.message;
+	if (!result) result = `${e.status} ${e.statusText}`;
+	response.json({ error: result });
+}
+
 api.get("/login", async (reqeust, response) => {
 	try {
 		response.redirect(authClient.generateAuthURL({
 			state: SERVICE_NAME,
 			code_challenge_method: "s256",
 		}));
-	} catch (e) { response.json(e); }
+	} catch (e) { responseException(response, e); }
 });
 
 api.get("/callback", async (request, response) => {
@@ -31,24 +39,23 @@ api.get("/callback", async (request, response) => {
 			response.end("Calls from different services.");
 			return;
 		}
-		const token = await authClient.requestAccessToken(code);
-		const me = await client.users.findMyUser();
-		const cookie = [`uid=${me.data.id}`, `token_type=${token.token_type}`, `access_token=${token.access_token}`, "Secure=true", "HttpOnly=true"];
+		const { token_type, access_token } = await authClient.requestAccessToken(code);
+		const { data: { id, username } } = await client.users.findMyUser();
+		const cookie = [`uid=${id}`, `token_type=${token_type}`, `access_token=${access_token}`, "Secure=true", "HttpOnly=true"];
 		const path = api.getRoot();
 		if (path.length > 0)
 			cookie.push(`Path=${path}`);
-		console.debug(token);
-		if (token.token_type === "bearer")
-			bearerToken = new Twitter.OAuth2Bearer(token.access_token);
+		if (token_type === "bearer")
+			bearerToken = new Twitter.OAuth2Bearer(access_token);
 		response.setHeader('Set-Cookie', cookie);
-		response.redirect(`/?login=${me.data.username}`);
-	} catch (e) { response.json(e); }
+		response.redirect(`/?login=${username}`);
+	} catch (e) { responseException(response, e); }
 });
 
 api.get("/revoke", async (reqeust, response) => {
 	try {
 		response.json({ revoked: await authClient.revokeAccessToken() });
-	} catch (e) { response.json(e); }
+	} catch (e) { responseException(response, e); }
 });
 
 //
@@ -69,21 +76,23 @@ api.get("/lists", async (request, response) => {
 			],
 			"user.fields": ["created_at"],
 		};
-		if ("next" in request.query)
-			params.pagination_token = request.query.next;
+		const { next } = request.query;
+		if (next)
+			params.pagination_token = next;
 		response.json(await client.lists.listUserOwnedLists(uid, params));
-	} catch (e) { response.json(e); }
+	} catch (e) { responseException(response, e); }
 });
 
 api.post("/lists/create", async (reqeust, response) => {
 	try {
-		const q = reqeust.query;
-		const params = { name: q.name };
-		if ("description" in q) params.description = q.description;
-		if ("private" in q) params.private = q.private;
-		const r = await client.lists.listIdCreate(params);
-		console.debug(r);
-		response.json(await client.lists.listIdGet(r.data.id, {
+		const { name, description, private } = reqeust.query;
+		if (!name || name.length === 0) throw new TypeError("'Name' is required.");
+		const params = {};
+		if (name) params.name = name;
+		if (description) params.description = description;
+		if (private) params.private = private;
+		const { data: { id } } = await client.lists.listIdCreate(params);
+		response.json(await client.lists.listIdGet(id, {
 			expansions: ["owner_id"],
 			"list.fields": [
 				"created_at",
@@ -94,24 +103,26 @@ api.post("/lists/create", async (reqeust, response) => {
 			],
 			"user.fields": ["created_at"],
 		}));
-	} catch (e) { response.json(e); }
+	} catch (e) { responseException(response, e); }
 });
 
 api.put("/lists/:id", async (reqeust, response) => {
 	try {
-		const q = reqeust.query;
-		const params = { name: q.name };
-		if ("name" in q) params.name = q.name;
-		if ("description" in q) params.description = q.description;
-		if ("private" in q) params.private = q.private;
-		response.json(await client.lists.listIdUpdate(q.id, params));
-	} catch (e) { response.json(e); }
+		const { id, name, description, private } = reqeust.query;
+		const params = {};
+		if (name) params.name = name;
+		if (description) params.description = description;
+		if (private) params.private = private;
+		if (Object.keys(params).length === 0) throw new TypeError("request parameter is empty.");
+		response.json(await client.lists.listIdUpdate(id, params));
+	} catch (e) { responseException(response, e); }
 });
 
 api.delete("/lists/:id", async (reqeust, response) => {
 	try {
-		response.json(await client.lists.listIdDelete(reqeust.query.id));
-	} catch (e) { response.json(e); }
+		const { id } = reqeust.query;
+		response.json(await client.lists.listIdDelete(id));
+	} catch (e) { responseException(response, e); }
 });
 
 //
@@ -139,22 +150,27 @@ api.get("/list/:id", async (request, response) => {
 				"withheld"
 			],
 		};
-		if ("next" in request.query)
-			params.pagination_token = request.query.next;
-		response.json(await client.users.listGetMembers(request.query.id, params));
-	} catch (e) { response.json(e); }
+		const { id, next } = request.query;
+		if (next)
+			params.pagination_token = next;
+		response.json(await client.users.listGetMembers(id, params));
+	} catch (e) { responseException(response, e); }
 });
 
 api.post("/list/:id", async (request, response) => {
 	try {
-		response.json(await client.lists.listAddMember(request.query.id, request.query.member_id));
-	} catch (e) { response.json(e); }
+		const { id, member_id } = reqeust.query;
+		if (!member_id) throw new TypeError("'member_id' is required.");
+		response.json(await client.lists.listAddMember(id, member_id));
+	} catch (e) { responseException(response, e); }
 });
 
 api.delete("/list/:id", async (request, response) => {
 	try {
-		response.json(await client.lists.listRemoveMember(request.query.id, request.query.member_id));
-	} catch (e) { response.json(e); }
+		const { id, member_id } = reqeust.query;
+		if (!member_id) throw new TypeError("'member_id' is required.");
+		response.json(await client.lists.listRemoveMember(id, member_id));
+	} catch (e) { responseException(response, e); }
 });
 
 ///////////////////////////////////////////////////////////////////////////////
