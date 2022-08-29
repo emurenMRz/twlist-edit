@@ -39,13 +39,25 @@ exports.patch = (endPoint, handle) => patchMethod.add(endPoint, handle);
 const deleteMethod = new API();
 exports.delete = (endPoint, handle) => deleteMethod.add(endPoint, handle);
 
-const queryParser = (params, s) => Object.assign(params, Object.fromEntries(s.split("&").map(v => v.split("=").map(w => decodeURIComponent(w)))));
+const parseQueryString = (s) => Object.fromEntries(s.split("&").map(v => v.split("=").map(w => decodeURIComponent(w))));
 
 const getRequestBody = async (request) => {
 	const body = [];
 	for await (const chunk of request)
 		body.push(chunk);
 	return Buffer.concat(body).toString();
+};
+
+const parseEntity = async (request) => {
+	const body = await getRequestBody(request);
+	const { "content-type": contentType } = request.headers;
+	if (contentType) {
+		if (contentType.indexOf("application/x-www-form-urlencoded") != -1)
+			return parseQueryString(body);
+		else if (contentType.indexOf("application/json") != -1)
+			return JSON.parse(body);
+	}
+	return { body };
 };
 
 let rootPath = "";
@@ -82,7 +94,7 @@ exports.listen = function (port) {
 
 			const paramIndex = endPoint.indexOf("?");
 			if (paramIndex >= 0) {
-				queryParser(request.query, endPoint.substring(paramIndex + 1));
+				Object.assign(request.query, parseQueryString(endPoint.substring(paramIndex + 1)));
 				endPoint = endPoint.substring(0, paramIndex);
 			}
 
@@ -95,13 +107,7 @@ exports.listen = function (port) {
 				else if (request.method === "PATCH") method = patchMethod;
 				else if (request.method === "DELETE") method = deleteMethod;
 
-				if ("content-length" in request.headers) {
-					const body = await getRequestBody(request);
-					if ("content-type" in request.headers && request.headers["content-type"] === "application/x-www-form-urlencoded")
-						queryParser(request.query, body);
-					else
-						request.query.body = body;
-				}
+				Object.assign(request.query, await parseEntity(request));
 
 				result = method.call(endPoint, request, response);
 			}
