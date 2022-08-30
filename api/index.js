@@ -156,17 +156,17 @@ api.get("/list/:id", async (request, response) => {
 
 api.post("/list/:id", async (request, response) => {
 	try {
-		const { id, member_id } = request.query;
-		if (!member_id) throw new TypeError("'member_id' is required.");
-		response.json(await client.lists.listAddMember(id, member_id));
+		const { id, user_id } = request.query;
+		if (!user_id) throw new TypeError("'member_id' is required.");
+		response.json(await client.lists.listAddMember(id, { user_id }));
 	} catch (e) { responseException(response, e); }
 });
 
 api.delete("/list/:id", async (request, response) => {
 	try {
-		const { id, member_id } = request.query;
-		if (!member_id) throw new TypeError("'member_id' is required.");
-		response.json(await client.lists.listRemoveMember(id, member_id));
+		const { id, user_id } = request.query;
+		if (!user_id) throw new TypeError("'member_id' is required.");
+		response.json(await client.lists.listRemoveMember(id, { user_id }));
 	} catch (e) { responseException(response, e); }
 });
 
