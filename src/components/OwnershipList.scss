@@ -1,0 +1,15 @@
+.lists-box {
+	display: flex;
+	flex-direction: column;
+	width: 320px;
+
+	.lists {
+		display: grid;
+		width: 100%;
+	}
+
+	.loader {
+		line-height: 5em;
+		text-align: center;
+	}
+}

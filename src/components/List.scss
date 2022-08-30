@@ -1,0 +1,63 @@
+.list {
+	margin: .25em;
+	padding: .25em;
+	width: calc(100% - .5em);
+	background-color: wheat;
+	border-radius: 4px;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	&:hover {
+		background-color: rgb(243, 198, 114);
+	}
+
+	.list-line {
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+	}
+
+	.cell {
+		display: inline-block;
+	}
+
+	.mark {
+		width: 2em;
+		text-align: right;
+	}
+
+	.name {
+		font-weight: bold;
+	}
+
+	.member_count {
+		margin-left: auto;
+		text-align: right;
+	}
+
+	.description {
+		word-break: break-all;
+	}
+
+	.follower_count {}
+
+	.created_at {
+		margin-left: auto;
+		text-align: right;
+	}
+
+	.add {
+		width: 100%;
+		text-align: center;
+	}
+
+	.command {
+		text-align: center;
+
+		button {
+			margin: 0.5em 1em 0;
+			padding: 0.25em;
+			width: 5em;
+		}
+	}
+}

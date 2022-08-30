@@ -1,0 +1,24 @@
+<svg width="6.61mm" height="6.61mm" fill-rule="evenodd" stroke-linejoin="round" stroke-width="28.222" preserveAspectRatio="xMidYMid" version="1.2" viewBox="0 0 661 661" xmlSpace="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlnsOoo="http://xml.openoffice.org/svg/export">
+   <defs class="ClipPathGroup">
+      <clipPath id="presentation_clip_path">
+         <rect width="661" height="661"/>
+      </clipPath>
+   </defs>
+   <defs class="TextShapeIndex"></defs>
+   <defs class="EmbeddedBulletChars"></defs>
+   <g class="Master_Slide"></g>
+   <g class="SlideGroup">
+      <g class="Slide" clip-path="url(#presentation_clip_path)">
+         <g class="Page">
+            <g class="Graphic">
+               <g>
+                  <rect class="BoundingBox" width="661" height="661" fill="none"/>
+                  <path fill="#00ACEE" d="m607 343c0-42-23-78-57-95 5-11 7-24 7-37 0-58-45-105-101-105-12 0-24 2-35 6-17-35-51-59-91-59s-74 24-91 59c-11-4-23-6-35-6-56 0-101 47-101 105 0 13 2 26 6 37-33 17-56 53-56 95 0 40 20 74 51 92 0 5-1 9-1 14 0 58 45 105 101 105 12 0 24-2 35-6 17 35 51 59 91 59s74-24 91-59c11 4 23 6 35 6 56 0 101-47 101-105 0-5-1-9-1-14 30-18 51-52 51-92zm-174-88-115 172c-4 6-10 9-16 9-4 0-8-1-11-4l-3-2-64-64c-8-8-8-20 0-28s20-8 28 0l47 47 101-152c6-9 18-11 27-5s12 18 6 27z"/>
+               </g>
+            </g>
+         </g>
+      </g>
+   </g>
+</svg>

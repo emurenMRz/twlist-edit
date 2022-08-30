@@ -1,0 +1,45 @@
+.member-frame {
+	margin: .25em;
+	padding: .25em;
+	width: calc(100% - .5em);
+	height: calc(100% - .5em);
+	background-color: #eee;
+	border-radius: 4px;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+
+	&:hover {
+		background-color: rgb(243, 198, 114);
+	}
+
+	.icon {
+		border-radius: 4px;
+	}
+
+	.detail {
+		margin-left: 1em;
+	}
+
+	.id {
+		display: block;
+		color: gray;
+		font-size: .5em;
+	}
+
+	.name {
+		font-weight: bold;
+	}
+
+	.screen_name {
+		color: gray;
+		font-size: .75em;
+
+		&::before {
+			content: "@";
+		}
+	}
+}

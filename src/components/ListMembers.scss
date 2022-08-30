@@ -1,0 +1,40 @@
+.members-box {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+
+	a {
+		text-decoration: none;
+		color: black;
+	}
+
+	.members-header {
+		font-size: 1.5em;
+		font-weight: bold;
+	}
+
+	.members {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		overflow: hidden auto;
+		max-height: calc(100vh - 6.5em);
+	}
+
+	.members-action {
+		margin-left: auto;
+		display: flex;
+		flex-direction: row;
+
+		button {
+			margin: 0.25em;
+			padding: 0.25em;
+			min-width: 20em;
+		}
+	}
+
+	.loader {
+		line-height: 5em;
+		text-align: center;
+	}
+}
