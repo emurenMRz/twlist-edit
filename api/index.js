@@ -12,7 +12,6 @@ const client = new Twitter.Client(authClient);
 const port = process.env.PORT || 3000;
 
 const SERVICE_NAME = "tw-list-edit";
-let bearerToken = null;
 
 function responseException(response, e) {
 	console.dir(e, { depth: null });
@@ -39,15 +38,13 @@ api.get("/callback", async (request, response) => {
 			response.end("Calls from different services.");
 			return;
 		}
-		const { token_type, access_token } = await authClient.requestAccessToken(code);
+		const { token: { token_type, access_token } } = await authClient.requestAccessToken(code);
 		const { data: { id, username } } = await client.users.findMyUser();
-		const cookie = [`uid=${id}`, `token_type=${token_type}`, `access_token=${access_token}`, "Secure=true", "HttpOnly=true"];
-		const path = api.getRoot();
-		if (path.length > 0)
-			cookie.push(`Path=${path}`);
-		if (token_type === "bearer")
-			bearerToken = new Twitter.OAuth2Bearer(access_token);
-		response.setHeader('Set-Cookie', cookie);
+		response.setHeader('Set-Cookie', [
+			`uid=${id}; Path=/; secure; httponly`,
+			`token_type=${token_type}; Path=/; secure; httponly`,
+			`access_token=${access_token}; Path=/; secure; httponly`
+		]);
 		response.redirect(`/?login=${username}`);
 	} catch (e) { responseException(response, e); }
 });
