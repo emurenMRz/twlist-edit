@@ -1,67 +1,64 @@
-const Twitter = require("twitter-api-sdk");
 const api = require("./api-server");
+const sessionDb = require("./session-db");
 
-const authClient = new Twitter.auth.OAuth2User({
-	client_id: process.env.CLIENT_ID,
-	client_secret: process.env.CLIENT_SECRET,
-	callback: `${process.env.API_SERVER_HOST}/callback`,
-	scopes: ["tweet.read", "users.read", "list.read", "list.write"],
-});
+const PORT = process.env.PORT || 3000;
+const sdb = new sessionDb.SessionDB();
 
-const client = new Twitter.Client(authClient);
-const port = process.env.PORT || 3000;
-
-const SERVICE_NAME = "tw-list-edit";
-
-function responseException(response, e) {
+function responseException(res, e) {
 	console.dir(e, { depth: null });
 
 	let result = e.message;
 	if (!result) result = `${e.status} ${e.statusText}`;
-	response.json({ error: result });
+	res.json({ error: result });
 }
 
-api.get("/login", async (reqeust, response) => {
+api.get("/login", async (req, res) => {
 	try {
-		response.redirect(authClient.generateAuthURL({
-			state: SERVICE_NAME,
+		const [sid, auth] = sdb.generate();
+		res.redirect(auth.generateAuthURL({
+			state: sid,
 			code_challenge_method: "s256",
 		}));
-	} catch (e) { responseException(response, e); }
+	} catch (e) { responseException(res, e); }
 });
 
-api.get("/callback", async (request, response) => {
+api.get("/callback", async (req, res) => {
 	try {
-		const { code, state } = request.query;
-		if (state !== SERVICE_NAME) {
-			response.writeHeader(500, { "Content-Type": "text/plain; charset=utf-8" });
-			response.end("Calls from different services.");
+		const { code, state: sid } = req.query;
+		if (!sdb.has(sid)) {
+			res.writeHeader(500, { "Content-Type": "text/plain; charset=utf-8" });
+			res.end("Calls from different services.");
 			return;
 		}
-		const { token: { token_type, access_token } } = await authClient.requestAccessToken(code);
+		const auth = sdb.getAuth(sid);
+		const { token: { token_type, access_token } } = await auth.requestAccessToken(code);
+		const client = sdb.makeClient(auth);
 		const { data: { id, username } } = await client.users.findMyUser();
-		response.setHeader('Set-Cookie', [
+		res.setHeader('Set-Cookie', [
+			`sid=${sid}; Path=/; secure; httponly`,
 			`uid=${id}; Path=/; secure; httponly`,
 			`token_type=${token_type}; Path=/; secure; httponly`,
 			`access_token=${access_token}; Path=/; secure; httponly`
 		]);
-		response.redirect(`/?login=${username}`);
-	} catch (e) { responseException(response, e); }
+		res.redirect(`/?login=${username}`);
+	} catch (e) { responseException(res, e); }
 });
 
-api.get("/revoke", async (reqeust, response) => {
+api.get("/revoke", async (req, res) => {
 	try {
-		response.json({ revoked: await authClient.revokeAccessToken() });
-	} catch (e) { responseException(response, e); }
+		const sid = req.searchCookieValue("sid");
+		const auth = sdb.getAuth(sid);
+		res.json({ revoked: await auth.revokeAccessToken() });
+	} catch (e) { responseException(res, e); }
 });
 
 //
 // Manage lists
 //
 
-api.get("/lists", async (request, response) => {
+api.get("/lists", async (req, res) => {
 	try {
-		const uid = request.searchCookieValue("uid");
+		const uid = req.searchCookieValue("uid");
 		const params = {
 			expansions: ["owner_id"],
 			"list.fields": [
@@ -73,23 +70,25 @@ api.get("/lists", async (request, response) => {
 			],
 			"user.fields": ["created_at"],
 		};
-		const { next } = request.query;
+		const { next } = req.query;
 		if (next)
 			params.pagination_token = next;
-		response.json(await client.lists.listUserOwnedLists(uid, params));
-	} catch (e) { responseException(response, e); }
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.listUserOwnedLists(uid, params));
+	} catch (e) { responseException(res, e); }
 });
 
-api.post("/lists/create", async (reqeust, response) => {
+api.post("/lists/create", async (req, res) => {
 	try {
-		const { name, description, private } = reqeust.query;
+		const { name, description, private } = req.query;
 		if (!name || name.length === 0) throw new TypeError("'Name' is required.");
 		const params = {};
 		if (name) params.name = name;
 		if (description) params.description = description;
 		if (private) params.private = private;
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
 		const { data: { id } } = await client.lists.listIdCreate(params);
-		response.json(await client.lists.listIdGet(id, {
+		res.json(await client.lists.listIdGet(id, {
 			expansions: ["owner_id"],
 			"list.fields": [
 				"created_at",
@@ -100,33 +99,35 @@ api.post("/lists/create", async (reqeust, response) => {
 			],
 			"user.fields": ["created_at"],
 		}));
-	} catch (e) { responseException(response, e); }
+	} catch (e) { responseException(res, e); }
 });
 
-api.put("/lists/:id", async (reqeust, response) => {
+api.put("/lists/:id", async (req, res) => {
 	try {
-		const { id, name, description, private } = reqeust.query;
+		const { id, name, description, private } = req.query;
 		const params = {};
 		if (name) params.name = name;
 		if (description) params.description = description;
 		if (private) params.private = private;
 		if (Object.keys(params).length === 0) throw new TypeError("request parameter is empty.");
-		response.json(await client.lists.listIdUpdate(id, params));
-	} catch (e) { responseException(response, e); }
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.listIdUpdate(id, params));
+	} catch (e) { responseException(res, e); }
 });
 
-api.delete("/lists/:id", async (reqeust, response) => {
+api.delete("/lists/:id", async (req, res) => {
 	try {
-		const { id } = reqeust.query;
-		response.json(await client.lists.listIdDelete(id));
-	} catch (e) { responseException(response, e); }
+		const { id } = req.query;
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.listIdDelete(id));
+	} catch (e) { responseException(res, e); }
 });
 
 //
 // List members
 //
 
-api.get("/list/:id", async (request, response) => {
+api.get("/list/:id", async (req, res) => {
 	try {
 		const params = {
 			expansions: ["pinned_tweet_id"],
@@ -147,30 +148,33 @@ api.get("/list/:id", async (request, response) => {
 				"withheld"
 			],
 		};
-		const { id, next } = request.query;
+		const { id, next } = req.query;
 		if (next)
 			params.pagination_token = next;
-		response.json(await client.users.listGetMembers(id, params));
-	} catch (e) { responseException(response, e); }
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.users.listGetMembers(id, params));
+	} catch (e) { responseException(res, e); }
 });
 
-api.post("/list/:id", async (request, response) => {
+api.post("/list/:id", async (req, res) => {
 	try {
-		const { id, user_id } = request.query;
+		const { id, user_id } = req.query;
 		if (!user_id) throw new TypeError("'member_id' is required.");
-		response.json(await client.lists.listAddMember(id, { user_id }));
-	} catch (e) { responseException(response, e); }
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.listAddMember(id, { user_id }));
+	} catch (e) { responseException(res, e); }
 });
 
-api.delete("/list/:id", async (request, response) => {
+api.delete("/list/:id", async (req, res) => {
 	try {
-		const { id, user_id } = request.query;
+		const { id, user_id } = req.query;
 		if (!user_id) throw new TypeError("'member_id' is required.");
-		response.json(await client.lists.listRemoveMember(id, { user_id }));
-	} catch (e) { responseException(response, e); }
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.listRemoveMember(id, { user_id }));
+	} catch (e) { responseException(res, e); }
 });
 
 ///////////////////////////////////////////////////////////////////////////////
 
 api.setRoot("/api");
-api.listen(port);
+api.listen(PORT);
