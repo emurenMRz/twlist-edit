@@ -1,7 +1,7 @@
 import '../utility';
 import React from 'react';
 import List, { Props as ListProps } from './List';
-import Confirm, { Mode } from '../Confirm';
+import Confirm, { Mode } from './Confirm';
 import './OwnershipList.scss';
 
 type Props = {
