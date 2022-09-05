@@ -35,10 +35,10 @@ api.get("/callback", async (req, res) => {
 		const client = sdb.makeClient(auth);
 		const { data: { id, username } } = await client.users.findMyUser();
 		res.setHeader('Set-Cookie', [
-			`sid=${sid}; Path=/; secure; httponly`,
-			`uid=${id}; Path=/; secure; httponly`,
-			`token_type=${token_type}; Path=/; secure; httponly`,
-			`access_token=${access_token}; Path=/; secure; httponly`
+			`sid=${sid}; Path=/; SameSite=Lax; secure; httponly`,
+			`uid=${id}; Path=/; SameSite=Lax; secure; httponly`,
+			`token_type=${token_type}; Path=/; SameSite=Lax; secure; httponly`,
+			`access_token=${access_token}; Path=/; SameSite=Lax; secure; httponly`
 		]);
 		res.redirect(`/?login=${username}`);
 	} catch (e) { responseException(res, e); }
