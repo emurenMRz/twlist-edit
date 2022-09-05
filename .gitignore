@@ -1,5 +1,5 @@
 /.vscode
-/build/bundle.js
+/build/bundle.*
 /build/style.css
 /node_modules
 /private
