@@ -1,22 +1,22 @@
 import React from 'react';
 import Member, { Props as MemberProps } from './Member';
+import Importer from './Importer';
 import './ListMembers.scss';
 
 export type Props = {
 	id: string;
 	name: string;
 	count: number;
-	setListInfo: Function;
+	onReset: Function;
 	setMessage: Function;
 }
 
 export default function ListMembers(props: Props) {
 	const beginImport = () => document.getElementsByName("file")[0].click();
-	const abortImport = () => { };
 	const refLoader = React.createRef<HTMLDivElement>();
 	const [members, setMembers] = React.useState([] as MemberProps[]);
 	const [nextToken, setNextToken] = React.useState<string | null>(null);
-	const [importState, setImportState] = React.useState<{ text: string, onClick: React.MouseEventHandler<HTMLButtonElement> }>({ text: "Import", onClick: beginImport });
+	const [importMembers, setImportMembers] = React.useState([] as MemberProps[]);
 
 	React.useEffect(() => {
 		if (props.id === undefined || props.id.length === 0) return;
@@ -66,23 +66,7 @@ export default function ListMembers(props: Props) {
 		reader.onload = async e => {
 			const text = e.target?.result;
 			if (typeof text !== "string") return;
-			const users = (JSON.parse(text) as MemberProps[]).filter(u => !members.some(m => m.id === u.id));
-			let importedUsers = 0;
-
-			try {
-				for (const user of users) {
-					const json = await POST(`list/${props.id}`, { user_id: user.id })
-					if (!json.data.is_member)
-						alert(`Failed add member: ${user.id}`);
-					else
-						setMembers(members.concat(user));
-					setImportState({ text: `Importing... [${importedUsers}/${users.length}]`, onClick: abortImport });
-				}
-				setImportState({ text: "Import", onClick: beginImport });
-			} catch (e) {
-				alert(e);
-				setImportState({ text: "Aborted", onClick: abortImport });
-			}
+			setImportMembers((JSON.parse(text) as MemberProps[]).filter(u => !members.some(m => m.id === u.id)));
 		};
 		reader.readAsText(files[0]);
 	}
@@ -101,12 +85,17 @@ export default function ListMembers(props: Props) {
 		URL.revokeObjectURL(url);
 	}
 
+	const handleAbort = function () {
+		setImportMembers([]);
+		props.onReset();
+	}
+
 	return (
 		<div className='members-box'>
 			<div className="members-header">
 				{props.name}
 				<div className="members-action">
-					<label><input type="file" style={{ display: "none" }} name="file" onChange={handleImport} /><button onClick={importState.onClick}>{importState.text}</button></label>
+					<label><input type="file" style={{ display: "none" }} name="file" onChange={handleImport} /><button onClick={beginImport}>Import</button></label>
 					<label><button onClick={handleExport}>Export [{members.length}/{props.count}]</button></label>
 				</div>
 			</div>
@@ -114,6 +103,7 @@ export default function ListMembers(props: Props) {
 				{members.length === 0 ? "メンバーがいません" : members.map((m: MemberProps) => <Member key={m.id} member={m} />)}
 				{nextToken !== null ? <div ref={refLoader} className="loader" data-next-token={nextToken}>Loading ...</div> : <></>}
 			</div>
+			<Importer listId={props.id} importMembers={importMembers} onAbort={handleAbort} />
 		</div >
 	);
 }

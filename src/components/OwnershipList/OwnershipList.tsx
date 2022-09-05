@@ -4,6 +4,7 @@ import Confirm, { Mode } from './Confirm';
 import './OwnershipList.scss';
 
 type Props = {
+	reset: number;
 	username: string;
 	setListInfo: Function;
 	setMessage: Function;
@@ -29,7 +30,7 @@ export default function OwnershipList(props: Props) {
 				setNextToken("next_token" in json.meta ? json.meta.next_token : null);
 			})
 			.catch(alert);
-	}, [props.username]);
+	}, [props.reset, props.username]);
 
 	React.useEffect(() => {
 		if (refLoader.current === null) return;
