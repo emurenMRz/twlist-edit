@@ -1,5 +1,5 @@
 import React from 'react';
-import Confirm, { Mode } from '../Confirm';
+import Confirm, { Mode } from './Confirm';
 import './list.scss';
 
 export type Props = {
