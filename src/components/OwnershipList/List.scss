@@ -1,14 +1,16 @@
+@use "../../color";
+
 .list {
 	margin: .25em;
 	padding: .25em;
 	width: calc(100% - .5em);
-	background-color: wheat;
+	background-color: color.$button-face;
 	border-radius: 4px;
 	box-sizing: border-box;
 	cursor: pointer;
 
 	&:hover {
-		background-color: rgb(243, 198, 114);
+		background-color: color.$button-face--hover;
 	}
 
 	.list-line {

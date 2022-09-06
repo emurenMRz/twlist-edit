@@ -1,5 +1,4 @@
-$dialog-button-bg-color: hsl(30, 30%, 40%);
-$dialog-button-bg-color--hover: hsl(30, 30%, 30%);
+@use "../../color";
 
 .importer {
 	visibility: hidden;
@@ -51,13 +50,14 @@ $dialog-button-bg-color--hover: hsl(30, 30%, 30%);
 		button {
 			margin: 1em;
 			padding: .5em 1em;
-			background-color: $dialog-button-bg-color;
+			background-color: color.$button-face;
 			border-radius: .4em;
-			color: white;
+			border-width: 0;
+			color: black;
 			cursor: pointer;
 
 			&:hover {
-				background-color: $dialog-button-bg-color--hover;
+				background-color: color.$button-face--hover;
 			}
 		}
 	}

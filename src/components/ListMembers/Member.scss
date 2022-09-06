@@ -1,9 +1,11 @@
+@use "../../color";
+
 .member-frame {
 	margin: .25em;
 	padding: .25em;
 	width: calc(100% - .5em);
 	height: calc(100% - .5em);
-	background-color: #eee;
+	background-color: color.$member-face;
 	border-radius: 4px;
 	box-sizing: border-box;
 	cursor: pointer;
@@ -13,7 +15,7 @@
 	align-items: flex-start;
 
 	&:hover {
-		background-color: rgb(243, 198, 114);
+		background-color: color.$member-face--hover;
 	}
 
 	.icon {

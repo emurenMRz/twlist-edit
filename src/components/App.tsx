@@ -3,6 +3,7 @@ import './App.scss';
 
 const BeforeLogin = () => (
   <header className="App-header">
+    <h1>TwList Editor</h1>
     <p>Twitter lists can be easily edited.</p>
     <a
       className="App-link"
