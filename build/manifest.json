@@ -1,6 +1,6 @@
 {
-  "short_name": "twlistedit",
-  "name": "Twitter list edit",
+  "short_name": "twlist",
+  "name": "Twitter list Backupper",
   "icons": [
     {
       "src": "favicon.ico",
