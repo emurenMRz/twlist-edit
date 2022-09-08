@@ -18,7 +18,7 @@ export default function UserInfo(props: Props) {
 
 	React.useEffect(() => {
 		if (user === undefined || user.length === 0) return;
-		(user[0] !== '@' ? GET(`user/${user}`) : GET(`user/by/${user.substring(1)}`))
+		(user[0] !== '@' ? GET(`user/${user}`) : GET(`userby/${user.substring(1)}`))
 			.then(json => {
 				if ("data" in json)
 					setTweet(json.data);

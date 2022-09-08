@@ -205,11 +205,9 @@ api.get("/user/:id", async (req, res) => {
 	} catch (e) { responseException(res, e); }
 });
 
-api.get("/user/by/:name", async (req, res) => {
+api.get("/userby/:name", async (req, res) => {
 	try {
-		const { name } = req.query;
 		const params = {
-			usernames: [name],
 			expansions: ["pinned_tweet_id"],
 			"user.fields": [
 				"id",
@@ -228,8 +226,9 @@ api.get("/user/by/:name", async (req, res) => {
 				"withheld"
 			],
 		};
+		const { name } = req.query;
 		const client = sdb.makeClient(req.searchCookieValue("sid"));
-		res.json(await client.users.findUserByUsername(params));
+		res.json(await client.users.findUserByUsername(name, params));
 	} catch (e) { responseException(res, e); }
 });
 

@@ -16,13 +16,14 @@ export default function Profile(props: Props) {
 
 	React.useEffect(() => {
 		if (!refUri || !refUri.current) return;
-		if (tw.url)
+		if (tw.url && tw.entities)
 			refUri.current.innerHTML = `🔗${applyEntitiesForProfile(tw, "url")}`;
 	});
 
 	React.useEffect(() => {
 		if (!refDesc || !refDesc.current) return;
-		refDesc.current.innerHTML = applyEntitiesForProfile(tw, "description");
+		if (tw.entities)
+			refDesc.current.innerHTML = applyEntitiesForProfile(tw, "description");
 	});
 
 	let mark = "";
