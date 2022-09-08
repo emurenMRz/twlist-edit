@@ -174,6 +174,65 @@ api.delete("/list/:id", async (req, res) => {
 	} catch (e) { responseException(res, e); }
 });
 
+//
+// Users
+//
+
+api.get("/user/:id", async (req, res) => {
+	try {
+		const params = {
+			expansions: ["pinned_tweet_id"],
+			"user.fields": [
+				"id",
+				"name",
+				"username",
+				"profile_image_url",
+				"created_at",
+				"description",
+				"entities",
+				"location",
+				"pinned_tweet_id",
+				"protected",
+				"public_metrics",
+				"url",
+				"verified",
+				"withheld"
+			],
+		};
+		const { id } = req.query;
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.users.findUserById(id, params));
+	} catch (e) { responseException(res, e); }
+});
+
+api.get("/user/by/:name", async (req, res) => {
+	try {
+		const { name } = req.query;
+		const params = {
+			usernames: [name],
+			expansions: ["pinned_tweet_id"],
+			"user.fields": [
+				"id",
+				"name",
+				"username",
+				"profile_image_url",
+				"created_at",
+				"description",
+				"entities",
+				"location",
+				"pinned_tweet_id",
+				"protected",
+				"public_metrics",
+				"url",
+				"verified",
+				"withheld"
+			],
+		};
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.users.findUserByUsername(params));
+	} catch (e) { responseException(res, e); }
+});
+
 ///////////////////////////////////////////////////////////////////////////////
 
 api.setRoot("/api");
