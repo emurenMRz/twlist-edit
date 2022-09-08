@@ -9,6 +9,6 @@ type Props = {
 export default function Header(props: Props) {
 	return (<div className="main-header">
 		<span className="screen-name">{props.name}</span>
-		<Input handleSearch={props.handleSearch} />
+		<Input onSearch={props.handleSearch} />
 	</div>);
 }
