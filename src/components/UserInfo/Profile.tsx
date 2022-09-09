@@ -12,19 +12,19 @@ export default function Profile(props: Props) {
 
 	const applyEntitiesForProfile = (profile: any, id: string) => applyEntities(null, profile.entities[id], profile[id]);
 
-	if (!tw) return null;
-
 	React.useEffect(() => {
 		if (!refUri || !refUri.current) return;
-		if (tw.url && tw.entities)
-			refUri.current.innerHTML = `🔗${applyEntitiesForProfile(tw, "url")}`;
+		if (!tw || !tw.url || !tw.entities) return;
+		refUri.current.innerHTML = `🔗${applyEntitiesForProfile(tw, "url")}`;
 	});
 
 	React.useEffect(() => {
 		if (!refDesc || !refDesc.current) return;
-		if (tw.entities)
-			refDesc.current.innerHTML = applyEntitiesForProfile(tw, "description");
+		if (!tw || !tw.entities) return;
+		refDesc.current.innerHTML = applyEntitiesForProfile(tw, "description");
 	});
+
+	if (!tw) return null;
 
 	let mark = "";
 	if (tw.protected) mark += stringFromCodePoint(0x1F512);
