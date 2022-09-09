@@ -5,7 +5,7 @@ class API {
 
 	add(endPoint, handler) {
 		if (endPoint.indexOf("/:"))
-			endPoint = new RegExp(`^${endPoint.replace(/\/:([^/]+)/g, "/(?<$1>[^/]+)")}`);
+			endPoint = new RegExp(`^${endPoint.replace(/\/:([^/]+)/g, "/(?<$1>[^/]+)")}$`);
 		this.#api.push({ endPoint, handler });
 	}
 
