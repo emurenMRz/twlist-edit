@@ -1,5 +1,6 @@
 import React from "react";
 import { stringFromCodePoint, localizeDate, applyEntities } from "./utility";
+import "./Profile.scss";
 
 type Props = {
 	tweet: any;
@@ -31,26 +32,35 @@ export default function Profile(props: Props) {
 	if (tw.following) mark += stringFromCodePoint(0x1F517);
 	if (tw.verified) mark += stringFromCodePoint(0x1F4AE);
 
+	const profileUrl = `https://twitter.com/intent/user?user_id=${tw.id}`;
+
 	return (
 		<div className="profile">
-			<div className="profile-data">
-				<div className="icon-area"><img className="user_icon" src={tw.profile_image_url} /></div>
-				<div className="data-area">
-					<div className="name">
-						<div className="owner">{tw.name}{mark}</div>
-						<div className="username"><a href={`https://twitter.com/intent/user?user_id=${tw.id}`} target="_blank" rel="noreferrer">{`@${tw.username}`}</a></div>
-					</div>
-					<div className="date">📅{localizeDate(tw.created_at)}</div>
-					<div className="detail">
-						<div>{tw.public_metrics.following_count} following</div>
-						<div>{tw.public_metrics.followers_count} followers</div>
-						<div>list: {tw.public_metrics.listed_count}</div>
-						<div>tweet: {tw.public_metrics.tweet_count}</div>
-						<div>🌎{tw.location}</div>
-						<div ref={refUri}></div>
-						<div ref={refDesc}></div>
-					</div>
+			<div className="basic-data">
+				<img className="icon" src={tw.profile_image_url} />
+				<div className="name">
+					<div className="username"><a href={profileUrl} target="_blank" rel="noreferrer">{`@${tw.username}`}</a></div>
+					<div className="owner">{tw.name}{mark}</div>
 				</div>
+			</div>
+			<div className="additional-data">
+				<div className="follow">
+					<div>{tw.public_metrics.following_count} following</div>
+					<div>{tw.public_metrics.followers_count} followers</div>
+					<div>list: {tw.public_metrics.listed_count}</div>
+					<div>tweet: {tw.public_metrics.tweet_count}</div>
+				</div>
+
+				<div ref={refUri} className="uri"></div>
+				<div ref={refDesc} className="description"></div>
+
+				<div className="location-and-create_at">
+					<div className="location">🌎{tw.location}</div>
+					<div className="craete_at">📅{localizeDate(tw.created_at)}</div>
+				</div>
+			</div>
+			<div className="command">
+				<a href={profileUrl} target="_blank" rel="noreferrer"><button>Open with Twitter</button></a>
 			</div>
 		</div>
 	);

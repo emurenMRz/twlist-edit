@@ -27,7 +27,7 @@ export default function MainScreen(props: Props) {
 		<Header name={props.name} handleSearch={handleSearch} />
 		<div className="workspace">
 			<OwnershipList reset={reset} username={props.name!} setListInfo={setListInfo} setMessage={setMessage} />
-			<ListMembers id={listInfo.id} name={listInfo.name} count={listInfo.count} onReset={handleReset} setMessage={setMessage} />
+			<ListMembers id={listInfo.id} name={listInfo.name} count={listInfo.count} onReset={handleReset} onUserSign={setUserSign} setMessage={setMessage} />
 			<UserInfo user={userSign} setMessage={setMessage} />
 		</div>
 		<Message message={message} setMessage={setMessage} />

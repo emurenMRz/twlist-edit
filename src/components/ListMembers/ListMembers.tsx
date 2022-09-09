@@ -8,6 +8,7 @@ export type Props = {
 	name: string;
 	count: number;
 	onReset: Function;
+	onUserSign: Function;
 	setMessage: Function;
 }
 
@@ -73,7 +74,7 @@ export default function ListMembers(props: Props) {
 
 	const handleExport = function (e: React.MouseEvent<HTMLButtonElement>) {
 		if (members.length !== props.count)
-			alert(`読込済の ${members.length}/${props.count} 件をエクスポートします`);
+			alert(`Export ${members.length}/${props.count} reads`);
 		const blob = new Blob([JSON.stringify(members)], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
@@ -100,7 +101,7 @@ export default function ListMembers(props: Props) {
 				</div>
 			</div>
 			<div className="members">
-				{members.length === 0 ? "メンバーがいません" : members.map((m: MemberProps) => <Member key={m.id} member={m} />)}
+				{members.length === 0 ? "No member" : members.map((m: MemberProps) => <Member key={m.id} member={m} onUserSign={props.onUserSign}/>)}
 				{nextToken !== null ? <div ref={refLoader} className="loader" data-next-token={nextToken}>Loading ...</div> : <></>}
 			</div>
 			<Importer listId={props.id} importMembers={importMembers} onAbort={handleAbort} />

@@ -1,60 +1,80 @@
+@use "../../color";
+
 .profile {
 	display: flex;
 	flex-direction: column;
-	width: 100%;
 	min-width: 640px;
-	max-width: 100%;
+	max-width: 640px;
 
-	.profile-banner {
-		width: 100%;
-		max-width: 600px;
-		max-height: 200px;
+	background-color: color.$profile-face;
+	border-radius: 4px;
+	box-sizing: border-box;
 
-		.banner {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-	}
-
-	.profile-data {
+	.basic-data {
 		display: flex;
+		flex-direction: row;
 
-		.user_icon {
+		.icon {
 			width: 40px;
 			height: 40px;
 			border-radius: 4px;
 		}
 
 		.name {
+			margin: 0;
 			padding: .25em 1em;
-			border-radius: 4px;
-			background-color: rgba(255, 255, 255, 128);
-			font-weight: bold;
-
-			.tweet_owner {
-				color: black;
-			}
 
 			.username {
 				font-size: x-small;
 				color: gray;
 				cursor: pointer;
 			}
+
+			.owner {
+				color: black;
+				font-weight: bold;
+			}
+		}
+	}
+
+	.additional-data {
+		.follow {
+			display: flex;
+			flex-direction: row;
+
+			padding-left: 1em;
+
+			div {
+				margin-right: 1em;
+			}
 		}
 
-		.date {
-			padding: .25em 1em;
-			border-radius: 4px;
-			background-color: rgba(255, 255, 255, 128);
-			font-size: x-small;
-			color: green;
+		.uri,
+		.description {
+			margin: .25em 1em;
 		}
 
-		.detail {
-			padding: .25em 1em;
-			border-radius: 4px;
-			background-color: rgba(255, 255, 255, 128);
+		.location-and-create_at {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+
+			.location {
+				padding: .25em 1em;
+			}
+
+			.craete_at {
+				padding: .25em 1em;
+			}
+		}
+	}
+
+	.command {
+		text-align: center;
+
+		button {
+			margin: 0.5em 1em 0;
+			padding: 0.25em;
 		}
 	}
 }
