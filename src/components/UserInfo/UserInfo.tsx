@@ -9,7 +9,8 @@ const Tweet = {
 
 type Props = {
 	user: string | undefined;
-	setMessage: Function;
+	onAddMember: Function;
+	onRemoveMember: Function;
 }
 
 export default function UserInfo(props: Props) {
@@ -31,7 +32,7 @@ export default function UserInfo(props: Props) {
 
 	return (
 		<div className="userinfo">
-			<Profile tweet={tweet} />
+			<Profile tweet={tweet} onAddMember={props.onAddMember} onRemoveMember={props.onRemoveMember} />
 		</div>
 	);
 }

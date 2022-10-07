@@ -7,7 +7,7 @@ export type Props = {
 	id: string;
 	name: string;
 	count: number;
-	onReset: Function;
+	onUpdateListData: Function;
 	onUserSign: Function;
 	setMessage: Function;
 }
@@ -44,8 +44,6 @@ export default function ListMembers(props: Props) {
 				GET(`list/${props.id}?next=${t.dataset.nextToken}`)
 					.then(json => {
 						if (nextToken === null) return;
-						if (json.error)
-							props.setMessage([json.error]);
 						if (json.meta.result_count > 0)
 							setMembers(members.concat(json.data));
 						setNextToken("next_token" in json.meta ? json.meta.next_token : null);
@@ -88,7 +86,7 @@ export default function ListMembers(props: Props) {
 
 	const handleAbort = function () {
 		setImportMembers([]);
-		props.onReset();
+		props.onUpdateListData(props.id);
 	}
 
 	return (
@@ -101,7 +99,7 @@ export default function ListMembers(props: Props) {
 				</div>
 			</div>
 			<div className="members">
-				{members.length === 0 ? "No member" : members.map((m: MemberProps) => <Member key={m.id} member={m} onUserSign={props.onUserSign}/>)}
+				{members.length === 0 ? "No member" : members.map((m: MemberProps) => <Member key={m.id} member={m} onUserSign={props.onUserSign} />)}
 				{nextToken !== null ? <div ref={refLoader} className="loader" data-next-token={nextToken}>Loading ...</div> : <></>}
 			</div>
 			<Importer listId={props.id} importMembers={importMembers} onAbort={handleAbort} />

@@ -60,7 +60,6 @@ api.get("/lists", async (req, res) => {
 	try {
 		const uid = req.searchCookieValue("uid");
 		const params = {
-			expansions: ["owner_id"],
 			"list.fields": [
 				"created_at",
 				"follower_count",
@@ -68,7 +67,6 @@ api.get("/lists", async (req, res) => {
 				"private",
 				"description"
 			],
-			"user.fields": ["created_at"],
 		};
 		const { next } = req.query;
 		if (next)
@@ -89,7 +87,6 @@ api.post("/lists/create", async (req, res) => {
 		const client = sdb.makeClient(req.searchCookieValue("sid"));
 		const { data: { id } } = await client.lists.listIdCreate(params);
 		res.json(await client.lists.listIdGet(id, {
-			expansions: ["owner_id"],
 			"list.fields": [
 				"created_at",
 				"follower_count",
@@ -97,7 +94,21 @@ api.post("/lists/create", async (req, res) => {
 				"private",
 				"description"
 			],
-			"user.fields": ["created_at"],
+		}));
+	} catch (e) { responseException(res, e); }
+});
+
+api.get("/lists/:id", async (req, res) => {
+	try {
+		const { id } = req.query;
+		res.json(await client.lists.listIdGet(id, {
+			"list.fields": [
+				"created_at",
+				"follower_count",
+				"member_count",
+				"private",
+				"description"
+			],
 		}));
 	} catch (e) { responseException(res, e); }
 });
@@ -165,12 +176,12 @@ api.post("/list/:id", async (req, res) => {
 	} catch (e) { responseException(res, e); }
 });
 
-api.delete("/list/:id", async (req, res) => {
+api.delete("/list/:id/members/:user_id", async (req, res) => {
 	try {
 		const { id, user_id } = req.query;
 		if (!user_id) throw new TypeError("'member_id' is required.");
 		const client = sdb.makeClient(req.searchCookieValue("sid"));
-		res.json(await client.lists.listRemoveMember(id, { user_id }));
+		res.json(await client.lists.listRemoveMember(id, user_id));
 	} catch (e) { responseException(res, e); }
 });
 
@@ -229,6 +240,20 @@ api.get("/userby/:name", async (req, res) => {
 		const { name } = req.query;
 		const client = sdb.makeClient(req.searchCookieValue("sid"));
 		res.json(await client.users.findUserByUsername(name, params));
+	} catch (e) { responseException(res, e); }
+});
+
+api.get("/user/:id/list_memberships", async (req, res) => {
+	try {
+		const params = {
+			expansions: ["owner_id"],
+			"list.fields": ["private"],
+		};
+		const { id, next } = req.query;
+		if (next)
+			params.pagination_token = next;
+		const client = sdb.makeClient(req.searchCookieValue("sid"));
+		res.json(await client.lists.getUserListMemberships(id, params));
 	} catch (e) { responseException(res, e); }
 });
 

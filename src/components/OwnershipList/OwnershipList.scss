@@ -3,6 +3,8 @@
 	flex-direction: column;
 	min-width: 320px;
 	max-width: 320px;
+    overflow: hidden auto;
+    max-height: calc(100vh - 1.5em);
 
 	.lists {
 		display: grid;

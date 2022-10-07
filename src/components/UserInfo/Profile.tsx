@@ -4,6 +4,8 @@ import "./Profile.scss";
 
 type Props = {
 	tweet: any;
+	onAddMember: Function;
+	onRemoveMember: Function;
 }
 
 export default function Profile(props: Props) {
@@ -17,13 +19,13 @@ export default function Profile(props: Props) {
 		if (!refUri || !refUri.current) return;
 		if (!tw || !tw.url || !tw.entities) return;
 		refUri.current.innerHTML = `🔗${applyEntitiesForProfile(tw, "url")}`;
-	});
+	}, [tw]);
 
 	React.useEffect(() => {
 		if (!refDesc || !refDesc.current) return;
 		if (!tw || !tw.entities) return;
 		refDesc.current.innerHTML = applyEntitiesForProfile(tw, "description");
-	});
+	}, [tw]);
 
 	if (!tw) return null;
 
@@ -61,6 +63,8 @@ export default function Profile(props: Props) {
 			</div>
 			<div className="command">
 				<a href={profileUrl} target="_blank" rel="noreferrer"><button>Open with Twitter</button></a>
+				<button onClick={() => props.onAddMember(tw.id)}>Add to List</button>
+				<button onClick={() => props.onRemoveMember(tw.id)}>Remove from List</button>
 			</div>
 		</div>
 	);

@@ -1,0 +1,64 @@
+@use "../../color";
+
+.list-import {
+	visibility: hidden;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-items: center;
+	justify-content: center;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background-color: hsla(0, 50%, 0%, .8);
+	opacity: 0;
+	transition: all .2s;
+	z-index: 100;
+
+	&-open {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	&-base {
+		color: white;
+		visibility: visible;
+		opacity: 1;
+	}
+
+	@mixin message-base($align: center) {
+		margin: 0 auto;
+		width: 640px;
+		max-width: 100%;
+		color: white;
+		text-align: $align;
+		font-weight: bold;
+	}
+
+	&-message {
+		@include message-base();
+	}
+
+	.button-group {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		margin: 0 auto;
+
+		button {
+			margin: 1em;
+			padding: .5em 1em;
+			background-color: color.$button-face;
+			border-radius: .4em;
+			border-width: 0;
+			color: black;
+			cursor: pointer;
+
+			&:hover {
+				background-color: color.$button-face--hover;
+			}
+		}
+	}
+}

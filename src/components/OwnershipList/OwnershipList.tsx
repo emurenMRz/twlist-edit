@@ -1,36 +1,21 @@
 import React from 'react';
 import List, { Props as ListProps } from './List';
+import { OwnershipList } from '../MainScreen';
 import Confirm, { Mode } from './Confirm';
 import './OwnershipList.scss';
 
 type Props = {
-	reset: number;
 	username: string;
+	ownershipList: OwnershipList;
+	setOwnershipList: Function;
 	setListInfo: Function;
 	setMessage: Function;
 }
 
 export default function OwnershipList(props: Props) {
 	const refLoader = React.createRef<HTMLDivElement>();
-	const [lists, setLists] = React.useState([] as ListProps[]);
-	const [nextToken, setNextToken] = React.useState<string | null>(null);
 	const [selectedListID, setSelectedListID] = React.useState<string | null>(null);
 	const [confirmMode, displayConfirm] = React.useState<Mode>(Mode.Close);
-
-	React.useEffect(() => {
-		setLists([]);
-		setNextToken(null);
-		setSelectedListID(null);
-		GET("lists")
-			.then(json => {
-				if (json.error)
-					props.setMessage([json.error]);
-				if (json.meta.result_count > 0)
-					setLists(json.data);
-				setNextToken("next_token" in json.meta ? json.meta.next_token : null);
-			})
-			.catch(alert);
-	}, [props.reset, props.username]);
 
 	React.useEffect(() => {
 		if (refLoader.current === null) return;
@@ -40,12 +25,13 @@ export default function OwnershipList(props: Props) {
 				const t = entry.target;
 				GET(`lists?next=${t.dataset.nextToken}`)
 					.then(json => {
-						if (nextToken === null) return;
-						if (json.error)
-							props.setMessage([json.error]);
-						if (json.meta.result_count > 0)
-							setLists(lists.concat(json.data));
-						setNextToken("next_token" in json.meta ? json.meta.next_token : null);
+						if (props.ownershipList.nextToken === null) return;
+						const { data, meta: { result_count: resultCount, next_token: nextToken } } = json;
+						const ol = { ...props.ownershipList };
+						if (resultCount > 0)
+							ol.lists.concat(data);
+						ol.nextToken = nextToken === undefined ? null : nextToken;
+						props.setOwnershipList(ol);
 					})
 					.catch(alert);
 				observer.unobserve(entry.target);
@@ -61,16 +47,18 @@ export default function OwnershipList(props: Props) {
 
 	const handleUpdateList = (id: string, action: { updated: boolean, deleted: boolean, name: string, description: string, private: boolean }) => {
 		if ("updated" in action) {
-			const newLists = [...lists];
-			const target = newLists.find(v => v.id === id);
+			const ol = { ...props.ownershipList };
+			const target = ol.lists.find(v => v.id === id);
 			if (!target) throw new Error(`Not found id: [${id}] ${action.name}`);
 			target.description = action.description;
 			target.private = action.private;
-			setLists(newLists);
+			props.setOwnershipList(ol);
 			setSelectedListID(id);
 			props.setListInfo({ id, name: action.name, count: target.member_count });
 		} else if ("deleted" in action) {
-			setLists(lists.filter(v => v.id !== id));
+			const ol = { ...props.ownershipList };
+			ol.lists = ol.lists.filter(v => v.id !== id);
+			props.setOwnershipList(ol);
 			setSelectedListID(null);
 			props.setListInfo({});
 		}
@@ -97,10 +85,11 @@ export default function OwnershipList(props: Props) {
 		if (description.length > 0) params["description"] = description;
 		POST("lists/create", params)
 			.then(json => {
-				if ("error" in json)
-					console.error(JSON.stringify(json));
-				if ("data" in json)
-					setLists([...lists, json.data]);
+				if ("data" in json) {
+					const ol = { ...props.ownershipList };
+					ol.lists.concat(json.data);
+					props.setOwnershipList(ol);
+				}
 			})
 			.catch(alert);
 		displayConfirm(Mode.Close);
@@ -114,15 +103,13 @@ export default function OwnershipList(props: Props) {
 	return (
 		<div className='lists-box'>
 			<div className="lists">
-				{lists.map((l: ListProps) => <List key={l.id} list={l} onOpenList={handleOpenList} onUpdateList={handleUpdateList} selectedListID={selectedListID} />)}
-				{nextToken !== null ? <div ref={refLoader} className="loader" data-next-token={nextToken}>Loading ...</div> : <></>}
-				{
-					<div className='list' onClick={() => displayConfirm(Mode.Create)}>
-						<div className="list-line">
-							<div className="cell add"><img src="./images/add.svg" alt="Add" /></div>
-						</div>
+				{props.ownershipList.lists.map((l: ListProps) => <List key={l.id} list={l} onOpenList={handleOpenList} onUpdateList={handleUpdateList} selectedListID={selectedListID} />)}
+				{props.ownershipList.nextToken !== null ? <div ref={refLoader} className="loader" data-next-token={props.ownershipList.nextToken}>Loading ...</div> : null}
+				<div className='list' onClick={() => displayConfirm(Mode.Create)}>
+					<div className="list-line">
+						<div className="cell add"><img src="./images/add.svg" alt="Add" /></div>
 					</div>
-				}
+				</div>
 			</div>
 			<Confirm mode={confirmMode} onClick={handleCreate} onCancel={handleCancel} />
 		</div>
