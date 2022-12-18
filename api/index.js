@@ -1,3 +1,12 @@
+const process = require("process");
+const fs = require("fs");
+
+fs.writeFile("twlist.pid", `${process.pid}`, (err) => {
+	console.info(`pid: ${process.pid}`);
+	if (err)
+		console.info(err);
+});
+
 const api = require("./api-server");
 const sessionDb = require("./session-db");
 

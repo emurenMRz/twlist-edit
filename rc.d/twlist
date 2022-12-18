@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# PROVIDE: twlist
+# REQUIRE: DAEMON
+# BEFORE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="twlist"
+rcvar="${name}_enable"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+node="/usr/local/bin/node"
+
+twlist_chdir="/var/www/${name}/api"
+twlist_user="${name}"
+pidfile="${twlist_chdir}/${name}.pid"
+
+twlist_start()
+{
+	su - $twlist_user -c "cd ${twlist_chdir}; nohup ${node} -r dotenv/config index.js &"
+}
+
+twlist_stop()
+{
+	su - $twlist_user -c "/bin/kill -s INT `cat ${pidfile}`; rm ${pidfile}"
+}
+
+load_rc_config $name
+run_rc_command "$1"
